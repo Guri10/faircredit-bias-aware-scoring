@@ -24,3 +24,24 @@ stages:
       hash: md5
       md5: 05074b74330db37a6bb0fa74d63d061c
       size: 66289
+  train_baseline:
+    cmd: python -m src.train_baseline
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 723a48066e683721e7c75797564d17c7
+      size: 16824
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 05074b74330db37a6bb0fa74d63d061c
+      size: 66289
+    - path: src/train_baseline.py
+      hash: md5
+      md5: fc92bb28fc052e6e7589a8efe0e53334
+      size: 1552
+    outs:
+    - path: mlruns
+      hash: md5
+      md5: 034262835ed6cb6173697d44204e44d5.dir
+      size: 3030664
+      nfiles: 42
