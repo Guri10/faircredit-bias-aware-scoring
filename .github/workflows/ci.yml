@@ -36,10 +36,7 @@ jobs:
             --name faircredit-image
 
       - name: Run Docker container
-        run: docker run --platform linux/amd64 -d \
-          --name faircredit \
-          -p 1234:1234 \
-          faircredit-image
+        run: docker run --platform linux/amd64 -d --name faircredit -p 1234:1234 faircredit-image
 
       - name: Wait for server to be ready
         run: |
