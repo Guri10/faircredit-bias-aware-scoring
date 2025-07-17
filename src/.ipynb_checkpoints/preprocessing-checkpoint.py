@@ -5,6 +5,11 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+proj_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+data_path = os.path.join(proj_root, "data", "raw", "german.data")
+
+
 # 1. Column names (same as your notebook)
 col_names = [
     "Status_Checking_Account", "Duration", "Credit_History", "Purpose",
