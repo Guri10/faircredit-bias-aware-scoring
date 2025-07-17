@@ -45,20 +45,29 @@ if __name__ == "__main__":
     df = load_data(path=data_path)
     X_train, X_test, y_train, y_test, preproc = split_and_preprocess(df)
 
+    mlflow.set_experiment("faircredit_baseline")
     with mlflow.start_run() as run:
         clf = RandomForestClassifier(n_estimators=100, random_state=42)
         clf.fit(X_train, y_train)
 
-        # 1) Log metrics
         preds = clf.predict(X_test)
         mlflow.log_metric("accuracy", accuracy_score(y_test, preds))
         mlflow.log_metric("roc_auc", roc_auc_score(y_test, clf.predict_proba(X_test)[:,1]))
 
-        # 2) **Log the pyfunc-wrapped model**
+        # Log model
         mlflow.sklearn.log_model(
             sk_model=clf,
-            artifact_path="model",       # writes under mlruns/.../model
-            registered_model_name=None   # or supply a name if you want registry
+            artifact_path="model"
         )
+
+        # Register model (creates models/m-<id> directory)
+        result = mlflow.register_model(
+            model_uri=f"runs:/{run.info.run_id}/model",
+            name="faircredit-baseline"
+        )
+
+        # Save location for CI
+        with open("model_uri.txt", "w") as f:
+            f.write(result.source)
 
     print("Run done — run_id:", run.info.run_id)

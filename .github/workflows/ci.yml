@@ -32,7 +32,7 @@ jobs:
       - name: Build Docker image
         run: |
           mlflow models build-docker \
-            --model-uri mlruns/0/models/m-f50ac53b9d6c49f4826758219bd5eca3/artifacts \
+            --model-uri $(cat model_uri.txt) \
             --name faircredit-image
 
       - name: Run Docker container
