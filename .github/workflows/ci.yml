@@ -24,7 +24,7 @@ jobs:
           pip install mlflow scikit-learn pandas pytest requests
 
       - name: Run baseline training
-        run: python src/train_baseline.py
+        run: python -m src.train_baseline
 
       - name: Generate payloads
         run: python scripts/generate_payload.py
