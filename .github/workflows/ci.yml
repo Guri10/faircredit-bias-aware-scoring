@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install Python dependencies
+        run: |
+          pip install mlflow scikit-learn pandas pytest requests
+
+      - name: Run baseline training
+        run: python src/train_baseline.py
+
+      - name: Generate payloads
+        run: python scripts/generate_payload.py
+
+      - name: Build Docker image
+        run: mlflow models build-docker \
+          -m mlruns/0/models/m-f50ac53b9d6c49f4826758219bd5eca3/artifacts \
+          -n faircredit-image
+
+      - name: Run Docker container
+        run: docker run --platform linux/amd64 -d \
+          --name faircredit \
+          -p 1234:1234 \
+          faircredit-image
+
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..15}; do
+            if curl --fail http://localhost:1234/health; then
+              echo "Server is up!"
+              exit 0
+            fi
+            echo "Waiting for model server..."
+            sleep 2
+          done
+          echo "Server did not start in time" && exit 1
+
+      - name: Run integration tests
+        run: pytest tests/test_api.py
+
+      - name: Stop and remove container
+        if: always()
+        run: |
+          docker stop faircredit
+          docker rm faircredit
