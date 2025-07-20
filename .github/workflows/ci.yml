@@ -36,19 +36,20 @@ jobs:
             --name faircredit-image
 
       - name: Run Docker container
-        run: docker run --platform linux/amd64 -d --name faircredit -p 1234:1234 faircredit-image
+        run: docker run --platform linux/amd64 -d --name faircredit -p 8000:8080 faircredit-image
 
       - name: Wait for server to be ready
         run: |
-          for i in {1..20}; do
-            if curl --silent --fail http://localhost:1234/ping; then
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/ping || true)
+            if [ "$code" = "200" ]; then
               echo "Server is up!"
               exit 0
             fi
-            echo "Waiting for model server..."
+            echo "Waiting for model server (got $code)…"
             sleep 3
           done
-          echo "Server did not start in time" && exit 1
+          echo "Server did not start in time"; exit 1
 
       - name: Run integration tests
         run: pytest tests/test_api.py
